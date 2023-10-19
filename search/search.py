@@ -138,11 +138,11 @@ def uniformCostSearch(problem):
     pq.push((start, []), 0)
     while not pq.isEmpty():
         current, action = pq.pop()
+        if problem.isGoalState(current):
+            return action
         if current in visited:
             continue
         visited.append(current)
-        if problem.isGoalState(current):
-            return action
         success =  problem.getSuccessors(current)
         for coord, direction, cost in success:
             current_action = action + [direction]
@@ -159,7 +159,26 @@ def nullHeuristic(state, problem=None):
 
 def aStarSearch(problem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
-    "*** YOUR CODE HERE ***"
+    start = problem.getStartState();
+    prior = heuristic(start, problem)
+    if problem.isGoalState(start):
+        return []
+    pq = util.PriorityQueue()
+    visited = []
+    pq.push((start, [], 0), prior)
+    while not pq.isEmpty():
+        current, action, pre = pq.pop()
+        if current in visited:
+            continue
+        visited.append(current)
+        if problem.isGoalState(current):
+            return action  
+        success =  problem.getSuccessors(current)
+        for coord, direction, cost in success:
+            possible = action + [direction]
+            pre_cost = problem.getCostOfActions(possible)
+            new_score = pre_cost + heuristic(coord, problem)
+            pq.push((coord, possible, pre_cost), new_score)
     util.raiseNotDefined()
 
 
