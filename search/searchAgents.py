@@ -40,6 +40,7 @@ from game import Actions
 import util
 import time
 import search
+import copy
 
 class GoWestAgent(Agent):
     "An agent that goes West until it can't."
@@ -288,21 +289,21 @@ class CornersProblem(search.SearchProblem):
         # Please add any code here which you would like to use
         # in initializing the problem
         "*** YOUR CODE HERE ***"
+        self.check = [False] * 4
 
     def getStartState(self):
         """
         Returns the start state (in your state space, not the full Pacman state
         space)
         """
-        "*** YOUR CODE HERE ***"
-        return (self.startingPosition, [])
+        return (self.startingPosition, self.check)
         util.raiseNotDefined()
 
     def isGoalState(self, state):
         """
         Returns whether this search state is a goal state of the problem.
         """
-        "*** YOUR CODE HERE ***"
+        return state[1][0] and state[1][1] and state[1][2] and state[1][3]
         util.raiseNotDefined()
 
     def getSuccessors(self, state):
@@ -324,8 +325,18 @@ class CornersProblem(search.SearchProblem):
             #   dx, dy = Actions.directionToVector(action)
             #   nextx, nexty = int(x + dx), int(y + dy)
             #   hitsWall = self.walls[nextx][nexty]
-
-            "*** YOUR CODE HERE ***"
+            x, y = state[0]
+            dx, dy = Actions.directionToVector(action)
+            nextx, nexty = int(x + dx), int(y + dy)
+            hitsWall = self.walls[nextx][nexty]
+            current = copy.deepcopy(state[1])
+            if not hitsWall:
+                poss = (nextx, nexty)
+                if poss in self.corners:
+                    spot = self.corners.index(poss)
+                    if not current[spot]:
+                        current[spot] = True
+                successors.append(((poss, current), action, 1))
 
         self._expanded += 1 # DO NOT CHANGE
         return successors
@@ -359,9 +370,27 @@ def cornersHeuristic(state, problem):
     """
     corners = problem.corners # These are the corner coordinates
     walls = problem.walls # These are the walls of the maze, as a Grid (game.py)
-
-    "*** YOUR CODE HERE ***"
-    return 0 # Default to trivial solution
+    x, y = state[0]
+    seen = state[1]
+    if problem.isGoalState(state):
+        return 0
+    unseen = []
+    for i in range(4):
+        if not seen[i]:
+            unseen.append(corners[i])
+    heuristic = 0
+    while unseen:
+        max_poss = float('inf')
+        closest_x, closest_y = state[0]
+        for corner in unseen:
+            distance = abs(x - corner[0]) + abs(y - corner[1])
+            if distance < max_poss:
+                max_poss = distance
+                closest_x, closest_y = corner
+        heuristic += max_poss
+        x, y = closest_x, closest_y
+        unseen.remove((closest_x, closest_y))
+    return heuristic
 
 class AStarCornersAgent(SearchAgent):
     "A SearchAgent for FoodSearchProblem using A* and your foodHeuristic"
@@ -455,7 +484,14 @@ def foodHeuristic(state, problem):
     """
     position, foodGrid = state
     "*** YOUR CODE HERE ***"
-    return 0
+    food_list = foodGrid.asList()
+    if not food_list:
+        return 0
+    heuristic = 0
+    for item in food_list:
+        distance = mazeDistance(position, item, problem.startingGameState)
+        heuristic = max(heuristic, distance)
+    return heuristic
 
 class ClosestDotSearchAgent(SearchAgent):
     "Search for all food using a sequence of searches"
@@ -486,6 +522,7 @@ class ClosestDotSearchAgent(SearchAgent):
         problem = AnyFoodSearchProblem(gameState)
 
         "*** YOUR CODE HERE ***"
+        return search.aStarSearch(problem)
         util.raiseNotDefined()
 
 class AnyFoodSearchProblem(PositionSearchProblem):
@@ -522,6 +559,7 @@ class AnyFoodSearchProblem(PositionSearchProblem):
         x,y = state
 
         "*** YOUR CODE HERE ***"
+        return self.food[x][y]
         util.raiseNotDefined()
 
 def mazeDistance(point1, point2, gameState):

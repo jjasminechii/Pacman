@@ -96,15 +96,14 @@ def depthFirstSearch(problem):
     stack.push((start, []))
     while not stack.isEmpty():
         current, action = stack.pop()
-        if current in visited:
-            continue
-        visited.append(current)
         if problem.isGoalState(current):
             return action
-        for coord, direction, cost in problem.getSuccessors(current):
-            current_action = action + [direction]
-            if not coord in visited:
-                stack.push((coord, current_action))
+        if current not in visited:
+            visited.append(current)
+            for coord, direction, cost in problem.getSuccessors(current):
+                current_action = action + [direction]
+                if not coord in visited:
+                    stack.push((coord, current_action))
     util.raiseNotDefined()
 
 def breadthFirstSearch(problem):
@@ -119,13 +118,13 @@ def breadthFirstSearch(problem):
         current, action = queue.pop()
         if problem.isGoalState(current):
             return action
-        if current in visited:
-            continue
-        success =  problem.getSuccessors(current)
-        visited.append(current)
-        for coord, direction, cost in success:
-            current_action = action + [direction]
-            queue.push((coord, current_action))
+        if current not in visited:
+            success =  problem.getSuccessors(current)
+            visited.append(current)
+            for coord, direction, cost in success:
+                if coord not in visited:
+                    current_action = action + [direction]
+                    queue.push((coord, current_action))
     util.raiseNotDefined()
 
 def uniformCostSearch(problem):
@@ -140,14 +139,13 @@ def uniformCostSearch(problem):
         current, action = pq.pop()
         if problem.isGoalState(current):
             return action
-        if current in visited:
-            continue
-        visited.append(current)
-        success =  problem.getSuccessors(current)
-        for coord, direction, cost in success:
-            current_action = action + [direction]
-            updated = problem.getCostOfActions(current_action)
-            pq.push((coord, current_action), updated)
+        if current not in visited:
+            visited.append(current)
+            success =  problem.getSuccessors(current)
+            for coord, direction, cost in success:
+                current_action = action + [direction]
+                updated = problem.getCostOfActions(current_action)
+                pq.push((coord, current_action), updated)
     util.raiseNotDefined()
 
 def nullHeuristic(state, problem=None):
@@ -168,17 +166,16 @@ def aStarSearch(problem, heuristic=nullHeuristic):
     pq.push((start, [], 0), prior)
     while not pq.isEmpty():
         current, action, pre = pq.pop()
-        if current in visited:
-            continue
-        visited.append(current)
-        if problem.isGoalState(current):
-            return action  
-        success =  problem.getSuccessors(current)
-        for coord, direction, cost in success:
-            possible = action + [direction]
-            pre_cost = problem.getCostOfActions(possible)
-            new_score = pre_cost + heuristic(coord, problem)
-            pq.push((coord, possible, pre_cost), new_score)
+        if current not in visited:
+            visited.append(current)
+            if problem.isGoalState(current):
+                return action
+            success =  problem.getSuccessors(current)
+            for coord, direction, cost in success:
+                possible = action + [direction]
+                pre_cost = problem.getCostOfActions(possible)
+                new_score = pre_cost + heuristic(coord, problem)
+                pq.push((coord, possible, pre_cost), new_score)
     util.raiseNotDefined()
 
 
