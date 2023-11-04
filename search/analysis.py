@@ -18,7 +18,7 @@
 
 def question0():
     # This should be an integer greater than zero
-    hoursWorked = 0
+    hoursWorked = 14
     return hoursWorked
 
 if __name__ == '__main__':
