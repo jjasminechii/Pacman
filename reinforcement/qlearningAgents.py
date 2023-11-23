@@ -110,9 +110,9 @@ class QLearningAgent(ReinforcementAgent):
             return None
         
         if util.flipCoin(self.epsilon):
-          action = random.choice(legalActions)
+            action = random.choice(legalActions)
         else:
-          action = self.getPolicy(state)
+            action = self.getPolicy(state)
         return action
         util.raiseNotDefined()
 
@@ -210,7 +210,7 @@ class ApproximateQAgent(PacmanQAgent):
         features = self.featExtractor.getFeatures(state, action)
         difference = (reward + self.discount * next) - current
         for i in features:
-          self.weights[i] += self.alpha * difference * features[i]
+            self.weights[i] += self.alpha * difference * features[i]
 
     def final(self, state):
         "Called at the end of each game."
